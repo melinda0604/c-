@@ -1,0 +1,41 @@
+
+name: Build C++ EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Compile C++
+        shell: pwsh
+        run: |
+          $compiler = Get-Command g++ -ErrorAction SilentlyContinue
+          if (-not $compiler) {
+            throw "Compiler g++ tidak ditemukan"
+          }
+          g++ main.cpp -o aplikasi.exe
+          if ($LASTEXITCODE -ne 0) {
+            throw "Kompilasi gagal"
+          }
+
+      - name: Check EXE
+        run: |
+          if (!(Test-Path "aplikasi.exe")) {
+            throw "File EXE tidak ditemukan"
+          }
+          Get-Item "aplikasi.exe"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aplikasi-windows
+          path: aplikasi.exe
+          if-no-files-found: error
