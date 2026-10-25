@@ -1,0 +1,35 @@
+
+name: Build C++ EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compile C++
+        shell: pwsh
+        run: |
+          if (!(Test-Path "nama.cpp")) {
+            throw "File nama.cpp tidak ditemukan di folder utama"
+          }
+
+          g++ nama.cpp -o program.exe
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Kompilasi gagal"
+          }
+
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: program-windows
+          path: program.exe
+          if-no-files-found: error
